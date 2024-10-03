@@ -2,11 +2,14 @@ import streamlit as st
 import hashlib
 import time
 import os
+import json
 
 from viz import visualize_common_prefixes
 from search import parallel_lloom_search
 
 STARTING_STORIES = [
+    "Alice and James unexpectedly connect over a shared love for the Dusty Tome an old bookstore nestled on the edge of town. The scent of aging paper and leather bound Alice in a warm embrace as she browsed the labyrinthine aisles, it was her haven. James looked across at her.",
+    "It was after nightfall when, wet and tired, Fred and Dan came at last to the river crossing, and they found the way barred. At either end of the bridge there was a police car and on the further side of the river they could see that some new houses had been built: two-storeyed with narrow straight-sided windows, bare and dimly lit, all very gloomy making it uncrossable. A voice shouted in the dark, and they turned and ran, in spite of the chilly wind they were soon puffing and sweating. At the petrol station they gave it up. They had done nearly a mile. They were hungry and footsore.",
     "Once upon a time,",
     "The forest seemed darker then usual, but that did not bother Elis in the least.",
     "In the age before man,"
@@ -106,6 +109,7 @@ def main():
                     good_threads.append( (prob, new_tokens) )
 
             st.session_state.threads = good_threads
+            st.session_state.sorted_threads = sorted_threads
             st.session_state.add_space = add_space
             
             # if there is only one option - take it.
@@ -116,13 +120,15 @@ def main():
             
         threads = st.session_state.threads
         add_space = st.session_state.add_space
-        
+        json_data = json.dumps(threads)
         labels = [ thread for prob, thread in threads ]
+        
         viz = visualize_common_prefixes(labels)
         with right:
             st.graphviz_chart(viz)
             st.download_button('Download DOT Graph', viz.source, 'graph.dot', 'text/plain')
-            st.download_button('Download PNG', viz.pipe(format='png'), 'graph.png', 'image/png')               
+            st.download_button('Download PNG', viz.pipe(format='png'), 'graph.png', 'image/png')
+            st.download_button('Download JSON data', json_data, 'loom_data.json', 'application/json')            
 
         controls = st.container()        
         buttons = st.container()
