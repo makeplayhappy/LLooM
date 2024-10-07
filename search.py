@@ -82,27 +82,36 @@ def get_logprobs_llama(prompt, base_url):
            }
     
     response = requests.post(url, json=payload)
-    response_json = response.json()
 
-    #
-    probs = response_json['completion_probabilities'][0]['probs']
+    try:
+        response_json = response.json()
     
-    #'completion_probabilities': [{'content': ' drink', 'probs': [{'tok_str': ' meal', 'prob': 0.5032180547714233}, {'tok_str': ' drink', 'prob': 0.32488059997558594}, {'tok_str': ' break', 'prob': 0.0726146548986435}, {'tok_str': ' bite', 'prob': 0.04623968526721001}, {'tok_str': ' chance', 'prob': 0.02752920798957348}, {'tok_str': ' snack', 'prob': 0.025517795234918594}, {'tok_str': ' single', 'prob': 0.0}, {'tok_str': ' word', 'prob': 0.0}, {'tok_str': ' breath', 'prob': 0.0}, {'tok_str': ' glass', 'prob': 0.0}]}]}
+        if 'completion_probabilities' in response_json and response_json['completion_probabilities']:
+            if 'probs' in response_json['completion_probabilities'][0]:
+                probs = response_json['completion_probabilities'][0]['probs']
+            else:
+                print("Warning: 'probs' key not found in the first completion probability.")
+                probs = []
+        else:
+            print("Warning: 'completion_probabilities' is empty or not present in the response.")
+            probs = []
 
-#    print(probs)
-  
-#    [
-#        {'tok_str': ',', 'prob': 0.6417261958122253}, 
-#        {'tok_str': '.', 'prob': 0.2640358507633209}, 
-#        {'tok_str': ' and', 'prob': 0.09423793852329254}, 
-#        {'tok_str': ';', 'prob': 0.0}, 
-#        {'tok_str': ' without', 'prob': 0.0}, 
-#        {'tok_str': ' in', 'prob': 0.0}, 
-#        {'tok_str': ':', 'prob': 0.0}, 
-#        {'tok_str': ' with', 'prob': 0.0}, 
-#        {'tok_str': ' but', 'prob': 0.0}, 
-#        {'tok_str': ' for', 'prob': 0.0}
-#     ]
+    except json.JSONDecodeError:
+        print("Error: Failed to decode JSON from the response.")
+        probs = []
+    except IndexError:
+        print("Error: 'completion_probabilities' list is empty.")
+        probs = []
+    except KeyError as e:
+        print(f"Error: Expected key not found in JSON response: {e}")
+        probs = []
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        probs = []
+
+    # Now you can safely use 'probs'
+    #print(f"Number of probabilities: {len(probs)}")
+    #print(probs)
 
     return [ SimpleProbability(prob['tok_str'], prob['prob']) for prob in probs]
 

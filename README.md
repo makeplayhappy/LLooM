@@ -1,3 +1,24 @@
+# data_export Branch
+This branch is a very hacky bit of code, mostly written by LLMs!
+It contains code to run automated tests using llama.cpp across a folder of models. Its specifically geared towards a local install of llama.cpp - you'll need to edit if you're running something else.
+At minimum you need a backend that will output log probs.
+
+## loom_runall.py
+
+This runs a set of story writing prompts, they are predefined to try and catch generic storys. The aim is to compare the output from various models to see how they differ, in an attempt to help choosing a model for creative writing.
+
+## llama-benchmark-script.sh
+
+This automates running loom_runall across multiple models, it iterates through a set of *.gguf models in a specific folder, calls llamacpp to load them, runs the loom script, captures the output in a csv file per model and moves ontot he next one.
+
+## csv-combiner-script.py
+This takes the csv files generated and splits out each story and combines all models into one file per story from the csv files, so you have all the story generations for the same prompt across all your models for comparison.
+
+___
+
+Original repo:
+
+
 # The LLooM
 
 Leverage raw LLM logits to weave the threads propability a few tokens at a time.
